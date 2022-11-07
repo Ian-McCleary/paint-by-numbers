@@ -6,4 +6,4 @@ I created this project before I had a good understanding of image processing met
 ![alt text](palouse.jpg)
 ![alt text](exoutput.PNG)
 # GUI
-![alt text](gui.png)
+![alt text](gui.PNG)
