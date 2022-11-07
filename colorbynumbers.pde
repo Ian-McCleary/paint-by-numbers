@@ -1,21 +1,22 @@
+//Created by Ian McCleary
 import com.chroma.*;
 import g4p_controls.*;
 import java.awt.Font;
 
 PImage p;
-PImage currentImage;
+PImage currentImage;        //user uploaded image
 PImage resetImage;
 PImage processImage;
 PImage whiteImage;
-int[][] colorList;
+int[][] colorList;           //list of pallet colors selected from image
 int[][] numberList;
-int maxColors = 15;
+int maxColors = 15;          //number of colors on pallet
 int currentStep = 0;
 int blurAmount = 1;
-int postAmount = 5;
-int numberSpacing = 40;
+int postAmount = 5;          //amount of post processing applied
+int numberSpacing = 40;      //radial spacing for number placement      
 int prevNumberSpacing = 40;
-int numberTextSize = 12;
+int numberTextSize = 12;     //number font size
 int outputWidth = 2550;
 int outputHeight = 3300;
 
@@ -113,19 +114,12 @@ void setup(){
  
 }
 
+//check if buttons are pressed and execute functions based on current step.
 void draw(){
   background(255);
   update(mouseX,mouseY);
-  //rotate(PI/2);
-  //translate(0,-currentImage.height);
-  //currentImage.resize(
   image(currentImage,0,0);
-  //translate(0,currentImage.height);
-  //rotate(-PI/2);
-  
-  //translate(0,-currentImage.height/2);
-  //println(int(blurField.getText()));
-  //step 1
+  //step 1, blur image for simplified color picking
   if (currentStep == 1){
     if (int(blurField.getText()) < 1){
       blurAmount = 1;
@@ -152,16 +146,7 @@ void draw(){
     copyI.filter(POSTERIZE, postAmount);
     copyI.updatePixels();
     processImage = copyI;
-    
-    
-    //rotate(PI/2);
-    //translate(0,-currentImage.height);
-    
     image(copyI,0,0);
-    //translate(0,currentImage.height);
-    //rotate(-PI/2);
-    
-    
   }
   if (currentStep == 2 || currentStep == 0){
 
@@ -205,8 +190,6 @@ void draw(){
     placeNumbers(currentImage);
     //draw hex list
     for (int i = 0; i < colorList.length; i++){
-        
-        
         //paint hex pallet
         fill(colorList[i][1]);
         rect(710,(colorList[i][0] * 25),60,20); 
@@ -217,7 +200,6 @@ void draw(){
     for (int i = 0; i < numberList.length; i++){
       if (numberList[i][0] != 0 && numberList[i][1] != 0 && numberList[i][2] != 0){
         //show text
-        //println(numberList[i]);
         textAlign(CENTER,CENTER);
         textSize(numberTextSize);
         fill(30,30,30);
@@ -330,19 +312,8 @@ void fileSelected(File selection) {
     //need to check if its a jpg
     currentImage=loadImage(canvasPath);
     currentImage.loadPixels();
-    //get the scaled image size to display. 16 x 9 aspect ratio. w=700.
-   //for (int i = currentImage.height; i <= 395; i-=16){
-      
-    //}
-    //currentImage.resize(700,400);
     currentImage.resize(700,394);
     image(currentImage,0,0);
-    //resetImage.resize(700,400);
-    //resetImage.loadPixels();
-    //set image size canvas: 700 x 400
-    
-    
-    
     resetImage = currentImage;
     
     blurField.setText("1");
@@ -378,7 +349,6 @@ void palletManager(int textX, int textY){
         numberList[i][0] = thisNumber;
         numberList[i][1] = textX;
         numberList[i][2] = textY;
-        //println(numberList[i]);
         break;
       }
     }
@@ -389,12 +359,9 @@ void palletManager(int textX, int textY){
 void placeNumbers(PImage inputPhoto){
   inputPhoto.loadPixels();
   int[][] textPosList = new int[(inputPhoto.width * inputPhoto.height)/40][4];
-  
-  //int count = inputPhoto.width * inputPhoto.height;
   int pixelSpace = numberSpacing;
   for (int y = pixelSpace; y < inputPhoto.height; y+=pixelSpace){
     for (int x = pixelSpace; x < inputPhoto.width; x+=pixelSpace){
-      //println(inputPhoto.get(x,y));
       //image is "grayscale" so only need red (all vals same)
       
       if (red(inputPhoto.get(x,y)) > 50){
@@ -463,27 +430,18 @@ void placeNumbers(PImage inputPhoto){
           }
         }
         if (takenPixel == false){
-           //fill(255,0,0);
-           //ellipse(textX,textY,textA,textB);
-          //println(textX,textY);
-          //println(p.get(textPosList[0][0],textPosList[0][1]));
           palletManager(textX,textY);
         }
-        
-        //if ( (sq(cx-textX)/sq(textA))+(sq(cy-textY)/ sq(textB))<=1){
       }
     }
   }
   
 }
-
+//draws the black lines around color groups
 void drawBorders(PImage startingImage){
+  //copy image
   startingImage.loadPixels();
-  //startingImage.filter(BLUR,1);
-  //startingImage.filter(POSTERIZE,5);
-  //startingImage.updatePixels();
   PImage overlayImage = createImage(startingImage.width,startingImage.height,RGB);
-  //background(255);
   overlayImage.loadPixels();
   
   int count = (overlayImage.width * overlayImage.height)-overlayImage.width-1;
@@ -534,13 +492,6 @@ void drawBorders(PImage startingImage){
     overlayImage.pixels[i+1] = color(255,255,255);
   }
   overlayImage.updatePixels();
-  
-  //whiteImage.loadPixels();
-  //image(overlayImage,0,0);
-  //currentImage = overlayImage;
-  
-  
-  //println(tpDelta + "->" + bpDelta + "->" + lpDelta + "->" + rpDelta + "->");
   }
   currentImage = overlayImage;
   currentImage.loadPixels();
@@ -557,30 +508,3 @@ float colorDistanceLAB(Chroma a, Chroma b) {
   double bDiff = aVals[2] - bVals[2];
   return sqrt( sq((float)lDiff) + sq((float)aDiff) + sq((float)bDiff));
 }
-
-
-//Chroma closestColorChroma(Chroma c){
-
-//  Chroma[] palletToUse = crayolaChroma;
-//  double recordDistance = 10000000;
-//  int index = 0;
-//  double[] cLabVals = c.get(ColorSpace.LAB);
-  
-//  for (int i = 0; i < palletToUse.length; i++){
-//    double[] palletLabVals = palletToUse[i].get(ColorSpace.LAB);
-//    //if (colorDistanceLAB(c, palletToUse[i]) < recordDistance) {
-//      double deltaE = calculateDeltaE(cLabVals[0],cLabVals[1],cLabVals[2],palletLabVals[0],palletLabVals[1],palletLabVals[2]);
-//      if (deltaE < recordDistance){
-//        recordDistance = deltaE;
-        
-//        //recordDistance = colorDistanceLAB(c, palletToUse[i]);
-//      //println(colorDistanceLAB(c, palletToUse[i]));
-//      //println(palletToUse[i].get());
-//      index = i;
-//     }
-//  }
-//  Chroma returnColor = palletToUse[index];
-//  return returnColor;
-  
-
-//}
